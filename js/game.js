@@ -58,20 +58,20 @@ var aircraft = {
 		// Change direction
 		if (this.turnCW) {
 			this.direction += 360 * elapsed;
-			this.direction = Math.abs(this.direction % 360);
 		};
 		if (this.turnCCW) {
 			this.direction -= 360 * elapsed;
-			this.direction = Math.abs(this.direction % 360);
 		};
 		//console.log(this.direction);
 
 		// Add engine velocity
 		if (this.engineOn) {
-			var angle = this.direction;
+			var angle = this.direction % 360;
 
 			var x = Math.cos(angle);
 			var y = Math.sin(angle);
+
+			console.log(x);
 
 			this.velX += this.speed * x * elapsed;
 			this.velY += this.speed * y * elapsed;

@@ -52,8 +52,9 @@ var aircraft = {
 		// Gravity
 		this.velY += 9.81 * elapsed;
 
-		// Horizontal air resistance
+		// Air resistance
 		this.velX -= this.velX * (this.drag * elapsed);
+		this.velY -= this.velY * (this.drag * elapsed);
 
 		// Change direction
 		if (this.turnCW) {
@@ -71,23 +72,22 @@ var aircraft = {
 			var x = Math.cos(angle);
 			var y = Math.sin(angle);
 
-			console.log(x);
-
 			this.velX += this.speed * x * elapsed;
 			this.velY += this.speed * y * elapsed;
 		};
 
-		// Bounding box - Got to find a better bounding box
-		if (this.y >= canvas.height) {
-			this.y = canvas.height-1;
-			this.velY = -this.velY * 0.75;
-		};
+		// Bounding box - Got to find a better bounding box		
 		if (this.x >= canvas.width) {
 			this.x = 0;
 		};
 		if (this.x < 0) {
 			this.x = canvas.width;
 		};
+		if (this.y >= canvas.height) {
+			this.y = canvas.height-1;
+			this.velY = -this.velY * 0.75;
+		};
+
 
 		this.y = Math.min(this.y + this.velY, canvas.height);
 		this.x = Math.min(this.x + this.velX, canvas.width);
@@ -108,7 +108,7 @@ var aircraft = {
 };
 
 /***********************
-	VARIOUS FUNCTIONS
+	HELPER FUNCTIONS
 ***********************/
 
 function drawRotatedImage(image, x, y, angle)
@@ -136,6 +136,7 @@ function drawRotatedImage(image, x, y, angle)
 		CONTROLS
 ***********************/
 
+// Aircraft
 Mousetrap.bind({
     'a': function() { aircraft.keyHandler('a', true); },
     'd': function() { aircraft.keyHandler('d', true); },

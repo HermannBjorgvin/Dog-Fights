@@ -37,9 +37,9 @@ var aircraft = {
 	velX: 0, // Horizontal velocity
 	velY: 0, // Vertical velocity
 	
-	power: 17, // Max engine output
+	power: 9, // Max engine output
 	drag: 0.4, // Drag coefficient
-	lift: 0.8, // Lift coefficient
+	lift: 1.5, // Lift coefficient
 	direction: 0, // 360° direction
 
 	engineOn: false, // booleans that control movement
@@ -47,7 +47,7 @@ var aircraft = {
 	turnCCW: false, // Is turning counter clockwise
 
 	draw: function(){
-		drawRotatedImage(imageObj, this.x, this.y, this.direction, 0.25);
+		drawRotatedImage(imageObj, this.x, this.y, this.direction, 0.5);
 	},
 	move: function(elapsed){
 

@@ -23,8 +23,6 @@ function tick(elapsed){
 	// Location/Velocity/AI
 	aircraft.move(elapsed);
 
-	player2.move(elapsed);
-
 	// Drawings
 	clearCanvas();
 	draw();
@@ -38,9 +36,10 @@ var aircraft = {
 	y: 200, // Vertical position
 	velX: 0, // Horizontal velocity
 	velY: 0, // Vertical velocity
-	power: 20, // Max engine output
-	drag: 0.125, // Drag coefficient
-	lift: 0.7, // Lift coefficient
+	
+	power: 17, // Max engine output
+	drag: 0.4, // Drag coefficient
+	lift: 0.8, // Lift coefficient
 	direction: 0, // 360° direction
 
 	engineOn: false, // booleans that control movement
@@ -48,7 +47,7 @@ var aircraft = {
 	turnCCW: false, // Is turning counter clockwise
 
 	draw: function(){
-		drawRotatedImage(imageObj, this.x, this.y, this.direction, 0.5);
+		drawRotatedImage(imageObj, this.x, this.y, this.direction, 0.25);
 	},
 	move: function(elapsed){
 
@@ -70,10 +69,10 @@ var aircraft = {
 
 		// Change direction
 		if (this.turnCW) {
-			this.direction += 360 * elapsed;
+			this.direction += 360 * elapsed * 0.4;
 		};
 		if (this.turnCCW) {
-			this.direction -= 360 * elapsed;
+			this.direction -= 360 * elapsed * 0.4;
 		};
 		//console.log(this.direction);
 
@@ -95,11 +94,19 @@ var aircraft = {
 		if (this.x < 0) {
 			this.x = canvas.width;
 		};
-		if (this.y >= canvas.height) {
-			this.y = canvas.height-1;
-			this.velY = -this.velY * 0.75;
-		};
 
+		// Aircraft top/bottom borders
+		if (this.y < 0) {
+			this.velY += Math.pow(this.y, 2) * elapsed;
+		};
+		if (this.y + (this.velY * elapsed) >= canvas.height) {
+			if (this.velY < 0.5) {
+				this.velY = 0;
+			}
+			else{
+				this.velY = -this.velY * 0.5;
+			};
+		};
 
 		this.y = Math.min(this.y + this.velY, canvas.height);
 		this.x = Math.min(this.x + this.velX, canvas.width);
@@ -118,95 +125,6 @@ var aircraft = {
 		}
 	}
 };
-
-// This is my aircraft, there are many like it but this one is mine
-var player2 = {
-	name: "TF-DAÐI",
-	x: 300, // Horizontal position
-	y: 600, // Vertical position
-	velX: 0, // Horizontal velocity
-	velY: 0, // Vertical velocity
-	power: 15, // Max engine output
-	drag: 0.25, // Drag coefficient
-	lift: 0.75, // Lift coefficient
-	direction: 0, // 360° direction
-
-	engineOn: false, // booleans that control movement
-	turnCW: false, // Is turning clockwise
-	turnCCW: false, // Is turning counter clockwise
-
-	draw: function(){
-		drawRotatedImage(imageObj, this.x, this.y, this.direction, 0.5);
-	},
-	move: function(elapsed){
-
-		var gravity = {
-			earth:9.81,
-			mars:3.711,
-			moon:1.622
-		};
-
-		// Gravity
-		this.velY += gravity.earth * elapsed;
-
-		// Drag coefficient
-		this.velX = bringToZero(this.velX, (Math.pow(this.velX, 2) * this.drag * elapsed));
-		this.velY = bringToZero(this.velY, (Math.pow(this.velY, 2) * this.drag * elapsed));
-
-		// Aircraft lift - simple variation, not accurate		
-		this.velY -= Math.abs(this.velX * this.lift * elapsed);
-
-		// Change direction
-		if (this.turnCW) {
-			this.direction += 360 * elapsed;
-		};
-		if (this.turnCCW) {
-			this.direction -= 360 * elapsed;
-		};
-		//console.log(this.direction);
-
-		// Add engine velocity
-		if (this.engineOn) {
-			var angle = this.direction % 360;
-
-			var x = Math.cos(angle * TO_RADIANS);
-			var y = Math.sin(angle * TO_RADIANS);
-
-			this.velX += this.power * x * elapsed;
-			this.velY += this.power * y * elapsed;
-		};
-
-		// Bounding box - Got to find a better bounding box		
-		if (this.x >= canvas.width) {
-			this.x = 0;
-		};
-		if (this.x < 0) {
-			this.x = canvas.width;
-		};
-		if (this.y >= canvas.height) {
-			this.y = canvas.height-1;
-			this.velY = -this.velY * 0.75;
-		};
-
-
-		this.y = Math.min(this.y + this.velY, canvas.height);
-		this.x = Math.min(this.x + this.velX, canvas.width);
-	},
-	keyHandler: function(key, state){
-		switch(key){
-			case 'w':
-				this.engineOn = state;
-			break;
-			case 'a':
-				this.turnCCW = state;
-			break;
-			case 'd':
-				this.turnCW = state;
-			break;
-		}
-	}
-};
-
 
 // This is my aircraft, there are many like it but this one is mine
 function bullet_constructor(){
@@ -234,10 +152,10 @@ function bullet_constructor(){
 
 		// Change direction
 		if (this.turnCW) {
-			this.direction += 360 * elapsed;
+			this.direction += 360 * elapsed * 0.5;
 		};
 		if (this.turnCCW) {
-			this.direction -= 360 * elapsed;
+			this.direction -= 360 * elapsed * 0.5;
 		};
 		//console.log(this.direction);
 
@@ -259,11 +177,10 @@ function bullet_constructor(){
 		if (this.x < 0) {
 			this.x = canvas.width;
 		};
-		if (this.y >= canvas.height) {
-			this.y = canvas.height-1;
+		if (this.y >= canvas.height-100) {
+			this.y = canvas.height-101;
 			this.velY = -this.velY * 0.75;
 		};
-
 
 		this.y = Math.min(this.y + this.velY, canvas.height);
 		this.x = Math.min(this.x + this.velX, canvas.width);
@@ -335,19 +252,6 @@ Mousetrap.bind({
     'w': function() { aircraft.keyHandler('w', false); }
 }, 'keyup');
 
-// Player 2
-Mousetrap.bind({
-    'left': function() { player2.keyHandler('a', true); },
-    'right': function() { player2.keyHandler('d', true); },
-    'up': function() { player2.keyHandler('w', true); }
-}, 'keydown');
-
-Mousetrap.bind({
-    'left': function() { player2.keyHandler('a', false); },
-    'right': function() { player2.keyHandler('d', false); },
-    'up': function() { player2.keyHandler('w', false); }
-}, 'keyup');
-
 /***********************
 	AIRCRAFT UPDATES
 ***********************/
@@ -360,7 +264,6 @@ Mousetrap.bind({
 
 function draw(){
 	aircraft.draw();
-	player2.draw();
 }
 
 function clearCanvas(){

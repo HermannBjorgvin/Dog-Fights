@@ -29,6 +29,10 @@ function tick(elapsed){
 
 }
 
+var gameSettings = {
+	groundHeight: 40
+}
+
 // This is my aircraft, there are many like it but this one is mine
 var aircraft = {
 	name: "TF-DESTROYER",
@@ -37,9 +41,9 @@ var aircraft = {
 	velX: 0, // Horizontal velocity
 	velY: 0, // Vertical velocity
 	
-	power: 9, // Max engine output
-	drag: 0.4, // Drag coefficient
-	lift: 1.5, // Lift coefficient
+	power: 16, // Max engine output
+	drag: 0.3, // Drag coefficient
+	lift: 1.2, // Lift coefficient
 	direction: 0, // 360° direction
 
 	engineOn: false, // booleans that control movement
@@ -50,6 +54,8 @@ var aircraft = {
 		drawRotatedImage(imageObj, this.x, this.y, this.direction, 0.5);
 	},
 	move: function(elapsed){
+		
+		var angle = this.direction % 360;
 
 		var gravity = {
 			earth:9.81,
@@ -58,28 +64,28 @@ var aircraft = {
 		};
 
 		// Gravity
-		this.velY += gravity.earth * elapsed;
+		this.velY += gravity.earth * 0.5 * elapsed;
 
 		// Drag coefficient
 		this.velX = bringToZero(this.velX, (Math.pow(this.velX, 2) * this.drag * elapsed));
 		this.velY = bringToZero(this.velY, (Math.pow(this.velY, 2) * this.drag * elapsed));
 
+		// Ground drag
+
 		// Aircraft lift - simple variation, not accurate
-		this.velY -= Math.abs(this.velX * this.lift * elapsed);
+		// this.velY -= Math.abs(Math.cos(angle * TO_RADIANS) * this.velX * this.lift * elapsed);
 
 		// Change direction
 		if (this.turnCW) {
-			this.direction += 360 * elapsed * 0.4;
+			this.direction += 360 * elapsed * 0.6;
 		};
 		if (this.turnCCW) {
-			this.direction -= 360 * elapsed * 0.4;
+			this.direction -= 360 * elapsed * 0.6;
 		};
 		//console.log(this.direction);
 
 		// Add engine velocity
 		if (this.engineOn) {
-			var angle = this.direction % 360;
-
 			var x = Math.cos(angle * TO_RADIANS);
 			var y = Math.sin(angle * TO_RADIANS);
 
@@ -98,14 +104,6 @@ var aircraft = {
 		// Aircraft top/bottom borders
 		if (this.y < 0) {
 			this.velY += Math.pow(this.y, 2) * elapsed;
-		};
-		if (this.y + (this.velY * elapsed) >= canvas.height) {
-			if (this.velY < 0.5) {
-				this.velY = 0;
-			}
-			else{
-				this.velY = -this.velY * 0.5;
-			};
 		};
 
 		this.y = Math.min(this.y + this.velY, canvas.height);

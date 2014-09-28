@@ -13,11 +13,16 @@ var planeSpritesheet = new Image();
 planeSpritesheet.src = 'assets/plane.png';
 
 var groundTexture = new Image();
-groundTexture.src = 'assets/groundTexture.png';
+groundTexture.src = 'assets/groundTexture2.png';
 var groundPattern;
+
+var treeTexture = new Image();
+treeTexture.src = 'assets/treeTexture.png';
+var treePattern;
 
 groundTexture.onload = function(){
 	groundPattern = ctx.createPattern(groundTexture,"repeat");
+	treePattern = ctx.createPattern(treeTexture,"repeat");
 }
 
 
@@ -57,9 +62,9 @@ function tick(elapsed){
 var gameSettings = {
 	groundHeight: 60,
 	gravity: {
-		earth:9.81 * 0.4,
-		mars:3.711 * 0.4,
-		moon:1.622 * 0.4
+		earth:9.81 * 0.5,
+		mars:3.711 * 0.5,
+		moon:1.622 * 0.5
 	}
 }
 
@@ -74,7 +79,7 @@ var aircraft = {
 	width: (68 * 0.5),
 	height: (87 * 0.5),
 	scale: 0.5,
-	power: 6, // Max engine output
+	power: 8, // Max engine output
 	drag: 0.2, // Drag coefficient
 	lift: 1.2, // Lift coefficient
 	direction: 0, // 360° direction
@@ -270,7 +275,7 @@ function drawBackground(){
 	**********/
 
 	// Main color
-	ctx.fillStyle = "#99CFE1";
+	ctx.fillStyle = "#8d3a1e";
 	ctx.fillRect(0,0,canvas.width,canvas.height);
 
 	// Radial gradient to sky
@@ -278,7 +283,7 @@ function drawBackground(){
 	grd = ctx.createRadialGradient(canvas.width/2, canvas.height, 0, canvas.width/2, canvas.height, canvas.width);
 
 	// Add colors
-	grd.addColorStop(0, '#EFF5FA');
+	grd.addColorStop(0, '#faad1b');
 	grd.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
 	// Fill with gradient
@@ -290,7 +295,7 @@ function drawBackground(){
 	*************/
 
 	// Main color
-	ctx.fillStyle = "#E6EAB8";
+	ctx.fillStyle = "#451c1b";
 	ctx.fillRect(0,canvas.height-gameSettings.groundHeight,canvas.width,gameSettings.groundHeight);
 
 	// Texture
@@ -298,8 +303,16 @@ function drawBackground(){
 	ctx.fillRect(0,canvas.height-gameSettings.groundHeight,canvas.width,gameSettings.groundHeight);
 
 	// Top line
-	ctx.fillStyle = "#D6C976";
+	ctx.fillStyle = "#2c0f0e";
 	ctx.fillRect(0,canvas.height-gameSettings.groundHeight,canvas.width,1);
+
+	// Trees
+	ctx.save();
+	ctx.fillStyle=treePattern;
+    ctx.translate(0, canvas.height-gameSettings.groundHeight-treeTexture.height);
+	ctx.fillRect(0, 0, canvas.width, treeTexture.height);
+	ctx.restore();
+
 }
 
 function clearCanvas(){

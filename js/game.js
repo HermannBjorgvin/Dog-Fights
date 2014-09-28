@@ -10,6 +10,10 @@ var TO_RADIANS = Math.PI/180;
 var planeSpritesheet = new Image();
 planeSpritesheet.src = 'assets/plane.png';
 
+var groundTexture = new Image();
+groundTexture.src = 'assets/groundTexture.png';
+var groundPattern=ctx.createPattern(groundTexture,"repeat");
+
 var bullets = [];
 
 /****************
@@ -30,7 +34,7 @@ function tick(elapsed){
 }
 
 var gameSettings = {
-	groundHeight: 40
+	groundHeight: 60
 }
 
 // This is my aircraft, there are many like it but this one is mine
@@ -72,7 +76,6 @@ var aircraft = {
 
 		ctx.drawImage(img, frameWidth*frame, 0, frameWidth, frameHeight, -(frameWidth/2) * scale, -(frameHeight/2) * scale, frameWidth * scale, frameHeight * scale);
 
-
 		ctx.restore();
 
 	},
@@ -100,8 +103,8 @@ var aircraft = {
 
 		// Change direction
 		if ((this.turnCW || this.turnCCW) && !(this.turnCW && this.turnCCW)) {
-			var turnRadius = 0.6;
-			if (this.engineOn) {
+			var turnRadius = 0.75;
+			if (this.engineOn == true) {
 				turnRadius = 0.4;
 			};
 			if (this.turnCW) {
@@ -121,18 +124,28 @@ var aircraft = {
 			this.velY += this.power * y * elapsed;
 		};
 
-		// Bounding box - Got to find a better bounding box		
-		if (this.x >= canvas.width) {
-			this.x = 0;
-		};
-		if (this.x < 0) {
-			this.x = canvas.width;
-		};
-
-		// Aircraft top/bottom borders
-		if (this.y < 0) {
-			this.velY += Math.pow(this.y, 2) * elapsed;
-		};
+		/***************************
+				BOUNDING BOX
+		***************************/
+			// RIGHT (exit right enter left)
+			if (this.x >= canvas.width) {
+				this.x = 0;
+			};
+			// LEFT (exit left enter right)
+			if (this.x < 0) {
+				this.x = canvas.width;
+			};
+			// TOP (ease down)
+			if (this.y < 0) {
+				this.velY += Math.pow(this.y, 2) * elapsed;
+			};
+			// BOTTOM (increased friction at ground level)
+			if (this.y > canvas.height-gameSettings.groundHeight) {
+				this.y = canvas.height-gameSettings.groundHeight;
+				this.velX = bringToZero(this.velX, 3 * elapsed);
+				this.velY = bringToZero(this.velY, 2 * elapsed);
+				this.velY = -this.velY*0.6;
+			};
 
 		this.y = Math.min(this.y + this.velY, canvas.height);
 		this.x = Math.min(this.x + this.velX, canvas.width);
@@ -274,7 +287,47 @@ Mousetrap.bind({
 ***********************/
 
 function draw(){
+	drawBackground();
 	aircraft.draw();
+}
+
+function drawBackground(){
+
+	/**********
+		SKY
+	**********/
+
+	// Main color
+	ctx.fillStyle = "#99CFE1";
+	ctx.fillRect(0,0,canvas.width,canvas.height);
+
+	// Radial gradient to sky
+	// Create gradient
+	grd = ctx.createRadialGradient(canvas.width/2, canvas.height, 0, canvas.width/2, canvas.height, canvas.width);
+
+	// Add colors
+	grd.addColorStop(0, '#EFF5FA');
+	grd.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+	// Fill with gradient
+	ctx.fillStyle = grd;
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+	/*************
+		GROUND
+	*************/
+
+	// Main color
+	ctx.fillStyle = "#E6EAB8";
+	ctx.fillRect(0,canvas.height-gameSettings.groundHeight,canvas.width,gameSettings.groundHeight);
+
+	// Texture
+	ctx.fillStyle=groundPattern;
+	ctx.fillRect(0,canvas.height-gameSettings.groundHeight,canvas.width,gameSettings.groundHeight);
+
+	// Top line
+	ctx.fillStyle = "#D6C976";
+	ctx.fillRect(0,canvas.height-gameSettings.groundHeight,canvas.width,1);
 }
 
 function clearCanvas(){

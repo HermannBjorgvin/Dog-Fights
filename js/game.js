@@ -7,8 +7,8 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var TO_RADIANS = Math.PI/180;
 
-var imageObj = new Image();
-imageObj.src = 'assets/plane.png';
+var planeSpritesheet = new Image();
+planeSpritesheet.src = 'assets/plane.png';
 
 var bullets = [];
 
@@ -21,7 +21,7 @@ gameTick.run(tick);
 function tick(elapsed){
 
 	// Location/Velocity/AI
-	aircraft.move(elapsed);
+	aircraft.fly(elapsed);
 
 	// Drawings
 	clearCanvas();
@@ -49,11 +49,34 @@ var aircraft = {
 	engineOn: false, // booleans that control movement
 	turnCW: false, // Is turning clockwise
 	turnCCW: false, // Is turning counter clockwise
+	primaryWeapon: false, // Primary weapon 
 
 	draw: function(){
-		drawRotatedImage(imageObj, this.x, this.y, this.direction, 0.5);
+		//drawRotatedImage(planeSpritesheet, this.x, this.y, this.direction, 0.5);
+
+		var scale = 0.5;
+		var angle = this.direction % 360;
+		var x = Math.cos(angle * TO_RADIANS);
+		var y = Math.sin(angle * TO_RADIANS);
+		
+		var frameNumber = 4;
+		var frame = Math.round(Math.abs(x * (frameNumber-1)));
+
+		var img = planeSpritesheet;
+		var frameWidth = 68;
+		var frameHeight = img.height;
+
+		ctx.save();
+		ctx.translate(this.x, this.y);
+    	ctx.rotate(angle * TO_RADIANS);
+
+		ctx.drawImage(img, frameWidth*frame, 0, frameWidth, frameHeight, -(frameWidth/2) * scale, -(frameHeight/2) * scale, frameWidth * scale, frameHeight * scale);
+
+
+		ctx.restore();
+
 	},
-	move: function(elapsed){
+	fly: function(elapsed){
 		
 		var angle = this.direction % 360;
 
@@ -76,13 +99,18 @@ var aircraft = {
 		// this.velY -= Math.abs(Math.cos(angle * TO_RADIANS) * this.velX * this.lift * elapsed);
 
 		// Change direction
-		if (this.turnCW) {
-			this.direction += 360 * elapsed * 0.6;
+		if ((this.turnCW || this.turnCCW) && !(this.turnCW && this.turnCCW)) {
+			var turnRadius = 0.6;
+			if (this.engineOn) {
+				turnRadius = 0.4;
+			};
+			if (this.turnCW) {
+				this.direction += 360 * elapsed * turnRadius;
+			};
+			if (this.turnCCW) {
+				this.direction -= 360 * elapsed * turnRadius;
+			};
 		};
-		if (this.turnCCW) {
-			this.direction -= 360 * elapsed * 0.6;
-		};
-		//console.log(this.direction);
 
 		// Add engine velocity
 		if (this.engineOn) {
@@ -111,13 +139,16 @@ var aircraft = {
 	},
 	keyHandler: function(key, state){
 		switch(key){
-			case 'w':
+			case 'throttle':
 				this.engineOn = state;
 			break;
-			case 'a':
+			case 'turnCCW':
 				this.turnCCW = state;
 			break;
-			case 'd':
+			case 'turnCW':
+				this.turnCW = state;
+			break;
+			case 'primaryWeapon':
 				this.turnCW = state;
 			break;
 		}
@@ -190,26 +221,6 @@ function bullet_constructor(){
 	HELPER FUNCTIONS
 ***********************/
 
-function drawRotatedImage(image, x, y, angle, scale){
-    // save the current co-ordinate system 
-    // before we screw with it
-    ctx.save(); 
-
-    // move to the middle of where we want to draw our image
-    ctx.translate(x, y);
-
-    // rotate around that point, converting our 
-    // angle from degrees to radians 
-    ctx.rotate(angle * TO_RADIANS);
-
-    // draw it up and to the left by half the width
-    // and height of the image 
-    ctx.drawImage(image, -(image.width/2) * scale, -(image.height/2) * scale, image.width * scale, image.height * scale);
-
-    // and restore the co-ords to how they were when we began
-    ctx.restore(); 
-}
-
 // Altering the math object to add a function that brings a number closer to zero by some delta
 function bringToZero(number, delta) {
 	if (number > 0) {
@@ -239,15 +250,17 @@ function bringToZero(number, delta) {
 
 // Aircraft
 Mousetrap.bind({
-    'a': function() { aircraft.keyHandler('a', true); },
-    'd': function() { aircraft.keyHandler('d', true); },
-    'w': function() { aircraft.keyHandler('w', true); }
+    'a': function() { aircraft.keyHandler('turnCCW', true); },
+    'd': function() { aircraft.keyHandler('turnCW', true); },
+    'w': function() { aircraft.keyHandler('throttle', true); },
+    'space': function() { aircraft.keyHandler('primaryWeapon', true); }
 }, 'keydown');
 
 Mousetrap.bind({
-    'a': function() { aircraft.keyHandler('a', false); },
-    'd': function() { aircraft.keyHandler('d', false); },
-    'w': function() { aircraft.keyHandler('w', false); }
+    'a': function() { aircraft.keyHandler('turnCCW', false); },
+    'd': function() { aircraft.keyHandler('turnCW', false); },
+    'w': function() { aircraft.keyHandler('throttle', false); },
+    'space': function() { aircraft.keyHandler('primaryWeapon', false); }
 }, 'keyup');
 
 /***********************

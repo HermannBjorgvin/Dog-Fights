@@ -280,7 +280,7 @@ function drawBackground(){
 
 	// Radial gradient to sky
 	// Create gradient
-	grd = ctx.createRadialGradient(canvas.width/2, canvas.height, 0, canvas.width/2, canvas.height, canvas.width);
+	grd = ctx.createRadialGradient(canvas.width/2, canvas.height-gameSettings.groundHeight, 0, canvas.width/2, canvas.height, canvas.width);
 
 	// Add colors
 	grd.addColorStop(0, '#faad1b');

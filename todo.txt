@@ -1,0 +1,27 @@
+Things to do:
+
+	Aircraft:
+		Rainbow smoketrail to indicate health (smoketrail with a rainbow background most likely, maybe have the rainbow change colors on health)
+		Make object prototype
+
+	Add more crafts, including but not limited to
+		Tanks (medium accuracy and high damage),
+		Helicopters (highly accurate but lesser damage),
+		Drones (unmanned airial vehicles),
+		Surface to Air missles (most likely a truck that rolls in and starts firing)
+
+	Local two player:
+		Split screens if players get to far appart (that way we allow a large map, include pointers to the other players)
+
+	Game modes:
+		Single player:
+			Survival (bunch of enemies),
+			Waves (enemies spawn in waves)
+
+		Local two player:
+			Duel (no enemies, players fight eachother),
+			Survival (bunch of enemies, same as single player)
+
+	Music:
+		Get Auðunn to play some ambient bass
+

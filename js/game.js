@@ -8,6 +8,7 @@ var ctx = canvas.getContext("2d");
 var TO_RADIANS = Math.PI/180;
 
 var bullets = [];
+var bombs = [];
 
 var planeSpritesheet = new Image();
 planeSpritesheet.src = 'assets/plane.png';
@@ -57,14 +58,23 @@ function tick(elapsed){
 		};
 	};
 
+	// Bombs
+	for (var i = bombs.length - 1; i >= 0; i--) {
+		bombs[i].iterate(elapsed);
+		bombs[i].draw();
+		if (bombs[i].active != 1) {
+			bombs.splice(i,1);
+		};
+	};
+
 }
 
 var gameSettings = {
 	groundHeight: 60,
 	gravity: {
-		earth:9.81 * 0.5,
-		mars:3.711 * 0.5,
-		moon:1.622 * 0.5
+		earth:9.81 * 0.2,
+		mars:3.711 * 0.2,
+		moon:1.622 * 0.2
 	}
 }
 
@@ -74,22 +84,27 @@ var aircraft = {
 	x: 300, // Horizontal position
 	y: 530, // Vertical position
 	velX: 0, // Horizontal velocity
-	velY: 0, // Vertical velocity
+	velY: -5, // Vertical velocity
 	
 	width: (68 * 0.5),
 	height: (87 * 0.5),
 	scale: 0.5,
-	power: 8, // Max engine output
+	power: 5, // Max engine output
 	drag: 0.2, // Drag coefficient
 	lift: 1.2, // Lift coefficient
-	direction: 0, // 360° direction
+	direction: 270, // 360° direction
 
 	engineOn: false, // booleans that control movement
 	turnCW: false, // Is turning clockwise
 	turnCCW: false, // Is turning counter clockwise
+
 	primaryWeapon: false, // Primary weapon
-	primaryWeaponChargeTime: 0.125,
+	primaryWeaponChargeTime: 0.05,
 	primaryWeaponCharge:0,
+
+	secondaryWeapon: false, // Primary weapon
+	secondaryWeaponChargeTime: 2,
+	secondaryWeaponCharge:0,
 
 	draw: function(){
 		//drawRotatedImage(planeSpritesheet, this.x, this.y, this.direction, 0.5);
@@ -120,7 +135,7 @@ var aircraft = {
 		var angle = this.direction % 360;
 
 		// Gravity
-		this.velY += gameSettings.gravity.earth * 0.5 * elapsed;
+		this.velY += gameSettings.gravity.earth * elapsed;
 
 		// Drag coefficient
 		this.velX = bringToZero(this.velX, (Math.pow(this.velX, 2) * this.drag * elapsed));
@@ -134,7 +149,7 @@ var aircraft = {
 		// Change direction
 		if ((this.turnCW || this.turnCCW) && !(this.turnCW && this.turnCCW)) {
 			var turnRadius = 0.75;
-			if (this.engineOn == true) {
+			if (this.engineOn || this.primaryWeapon) {
 				turnRadius = 0.4;
 			};
 			if (this.turnCW) {
@@ -189,9 +204,20 @@ var aircraft = {
 			var x_delta = Math.cos(angle * TO_RADIANS) * this.width;
 			var y_delta = Math.sin(angle * TO_RADIANS) * this.width;
 
-			var newBullet = new bulletConstructor(this.x + x_delta, this.y + y_delta, this.velX, this.velY, this.direction);
+			var spread = Math.random() * 4 - 2;
+			var newBullet = new bulletConstructor(this.x + x_delta, this.y + y_delta, this.velX, this.velY, this.direction + spread);
 			bullets.push(newBullet);
 			this.primaryWeaponCharge = 0;
+		};
+
+		this.secondaryWeaponCharge += elapsed;
+		if (this.secondaryWeapon && this.secondaryWeaponCharge >= this.secondaryWeaponChargeTime) {
+			var x_delta = Math.cos(angle * TO_RADIANS) * this.width;
+			var y_delta = Math.sin(angle * TO_RADIANS) * this.width;
+
+			var newBomb = new bombConstructor(this.x + x_delta, this.y + y_delta, this.velX, this.velY, this.direction);
+			bombs.push(newBomb);
+			this.secondaryWeaponCharge = 0;
 		};
 	},
 	keyHandler: function(key, state){
@@ -207,6 +233,9 @@ var aircraft = {
 			break;
 			case 'primaryWeapon':
 				this.primaryWeapon = state;
+			break;
+			case 'secondaryWeapon':
+				this.secondaryWeapon = state;
 			break;
 		}
 	}
@@ -248,14 +277,16 @@ Mousetrap.bind({
     'a': function() { aircraft.keyHandler('turnCCW', true); },
     'd': function() { aircraft.keyHandler('turnCW', true); },
     'w': function() { aircraft.keyHandler('throttle', true); },
-    'space': function() { aircraft.keyHandler('primaryWeapon', true); }
+    ',': function() { aircraft.keyHandler('primaryWeapon', true); },
+    '.': function() { aircraft.keyHandler('secondaryWeapon', true); }
 }, 'keydown');
 
 Mousetrap.bind({
     'a': function() { aircraft.keyHandler('turnCCW', false); },
     'd': function() { aircraft.keyHandler('turnCW', false); },
     'w': function() { aircraft.keyHandler('throttle', false); },
-    'space': function() { aircraft.keyHandler('primaryWeapon', false); }
+    ',': function() { aircraft.keyHandler('primaryWeapon', false); },
+    '.': function() { aircraft.keyHandler('secondaryWeapon', false); }
 }, 'keyup');
 
 /***********************

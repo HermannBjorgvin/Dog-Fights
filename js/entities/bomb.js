@@ -1,15 +1,15 @@
 
 // This is my rifle, there are many like it but this one is mine
-function bulletConstructor(x_coords, y_coords, x_vel, y_vel, direction){
+function bombConstructor(x_coords, y_coords, x_vel, y_vel, direction){
 	this.active = 1;
 	this.x = x_coords; // Horizontal position
 	this.y = y_coords; // Vertical position
 	this.velX = x_vel; // Horizontal velocity
 	this.velY = y_vel; // Vertical velocity
-	this.power = 10; // Max engine output
-	this.drag = 0.1; // Drag coefficient
+	this.power = 4; // Max engine output
+	this.drag = 0.6; // Drag coefficient
 	this.direction = direction; // 360° direction
-	this.radius = 2;
+	this.radius = 5;
 	this.age = 0;
 	this.maxAge = 1;
 	this.initialized = 0;
@@ -21,9 +21,6 @@ function bulletConstructor(x_coords, y_coords, x_vel, y_vel, direction){
 		ctx.fill();
 	};
 	this.iterate = function(elapsed){
-
-		// Gravity
-		this.velY += gameSettings.gravity.earth * elapsed;
 
 		// Velocity calculation from angle and power
 		var angle = this.direction % 360;

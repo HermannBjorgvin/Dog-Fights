@@ -11,7 +11,7 @@ function bombConstructor(x_coords, y_coords, x_vel, y_vel, direction){
 	this.direction = direction; // 360° direction
 	this.radius = 5;
 	this.age = 0;
-	this.maxAge = 1;
+	this.maxAge = 3;
 	this.initialized = 0;
 
 	this.draw = function(){
